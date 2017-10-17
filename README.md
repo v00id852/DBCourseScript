@@ -19,6 +19,8 @@
   chmod +x install.sh
   ./install.sh
   ```
+
+**如果有关于脚本的任何问题或者发现bug，请联系我，非常感谢**
   
  
   
