@@ -64,6 +64,13 @@ sh_path=$(pwd)
 
 write_log "script start"
 
+# check whether run as root
+if [ "$EUID" -ne 0 ]
+    then echo_color "Please run as root" r
+    write_log "user run not as root"
+    exit 1
+fi
+
 # check enviroment
 echo_color "**********check enviroment**********" b
 write_log "check enviroment"
@@ -167,7 +174,6 @@ if [ ${check_status} == 1 ]; then
     exit 1
 fi
 
-
 echo_color "**********install oracle repos**********" b
 
 echo_color "download repo" b
@@ -251,9 +257,9 @@ useradd -g oinstall -G dba Oracle &>>install.log
 password="pa"
 password_again="pass"
 
-echo_color "please input user Oracle's password" r
+echo_color "please set user Oracle's password" r
 read -s password
-echo_color "please input user Oracle's password again" r
+echo_color "please set user Oracle's password again" r
 read -s password_again
 
 until [ $password = $password_again ] 
@@ -296,6 +302,8 @@ net.core.wmem_max = 1048586" >> /etc/sysctl.conf
 	else
 	    write_log <<< echo_color "modify /etc/sysct.conf succeed" g
 	fi
+else
+    write_log "/etc/sysctl.conf has been modified"
 fi
 
 echo_color "start modify /etc/pam.d/login" b
@@ -306,6 +314,8 @@ Oracle soft nofile 1024
 Oracle hard nofile 65536
 Oracle soft stack 10240" >> /etc/security/limits.conf
 write_log <<< echo_color "modify /etc/pam.d/login" g
+else
+    write_log "/etc/pam.d/login has been modified" 
 fi
 
 echo_color "start modify /etc/profile" b
@@ -318,7 +328,10 @@ echo "if [ \$USER = \"Oracle\" ]; then
         ulimit -u 16384 -n 65536
     fi
 fi" >> /etc/profile
-write_log <<< echo_color "modify /etc/profile succed" g
+echo_color "modify /etc/profile succeed" g
+write_log "modify /etc/profile succeed"
+else 
+    write_log "/etc/profile has been modified"
 fi
 
 echo_color "**********config user Oracle*********" b
