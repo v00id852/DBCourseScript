@@ -52,6 +52,13 @@ function check_log(){
     fi
 }
 
+echo_color "***********Database Config Scripts***********" b
+echo_color "* Author: LeiZiang                          *" b
+echo_color "* QQ: 852644296                             *" b
+echo_color "* Please contact me if you have any question*" b
+echo_color "* about the script                          *" b
+echo_color "*********************************************"
+
 system_version="0"
 check_status=0
 sh_path=$(pwd)
