@@ -1,5 +1,4 @@
 #!/bin/bash
-
 # packages name which need to install
 packages=('binutils' 'compat-libstdc++-33' 'elfutils-libelf' 'elfutils-libelf-devel' 'elfutils-libelf-devel-static'' gcc' 'gcc-c++' 'glibc' 'glibc-common' 'glibc-devel' 'glibc-headers' 'kernel-headers' 'ksh' 'libaio' 'libaio-devel' 'libgcc' 'libgomp' 'libstdc++' 'libstdc++-devel' 'make' 'numactl-devel' 'sysstat' 'unixODBC' 'unixODBC-devel')
 
@@ -261,9 +260,9 @@ until [ $password = $password_again ]
 do
     echo_color "passwords are not same, please input again" r
     write_log "passwords are not same"
-    echo_color "please input user Oracle's password" r
+    echo_color "please set user Oracle's password" r
     read -s password
-    echo_color "please input user Oracle's password again" r
+    echo_color "please set user Oracle's password again" r
     read -s password_again
 done
  
@@ -279,7 +278,8 @@ chmod -R 775 /home/Oracle_11g
 echo_color "**********modify files**********" b
 echo_color "start modify /etc/sysctl.conf" b
 # modify /etc/sysctl.conf
-echo "fs.aio-max-nr = 1048576
+if [[ $(cat /etc/sysctl.conf | grep "aio-max-nr") = '' ]]; then
+	echo "fs.aio-max-nr = 1048576
 fs.file-max = 6815744
 kernel.shmall = 2097152
 kernel.shmmax = 536870912
@@ -289,24 +289,27 @@ net.core.rmem_default = 262144
 net.core.rmem_max = 4194304
 net.core.wmem_default = 262144
 net.core.wmem_max = 1048586" >> /etc/sysctl.conf
-sysctl -p &>>install.log
-if [[ "$?" != "0" ]]; then
-    write_log "sysctl error"
-    echo_color "sysctl error, please contact the author" r
-else
-    write_log <<< echo_color "modify /etc/sysct.conf succeed" g
+	sysctl -p &>>install.log
+	if [[ "$?" != "0" ]]; then
+	    write_log "sysctl error"
+	    echo_color "sysctl error, please contact the author" r
+	else
+	    write_log <<< echo_color "modify /etc/sysct.conf succeed" g
+	fi
 fi
 
-
 echo_color "start modify /etc/pam.d/login" b
+if [[ $(cat /etc/pam.d/login | grep "Oracle" ) = '' ]]; then
 echo "Oracle soft nproc 2047
 Oracle hard nproc 16384
 Oracle soft nofile 1024
 Oracle hard nofile 65536
 Oracle soft stack 10240" >> /etc/security/limits.conf
 write_log <<< echo_color "modify /etc/pam.d/login" g
+fi
 
 echo_color "start modify /etc/profile" b
+if [[ $(cat /etc/profile | grep "Oracle" ) = '' ]]; then
 echo "if [ \$USER = \"Oracle\" ]; then
     if [ \$SHELL = \"/bin/ksh\" ]; then
         ulimit -p 16384
@@ -316,6 +319,7 @@ echo "if [ \$USER = \"Oracle\" ]; then
     fi
 fi" >> /etc/profile
 write_log <<< echo_color "modify /etc/profile succed" g
+fi
 
 echo_color "**********config user Oracle*********" b
 
@@ -334,6 +338,11 @@ export LD_ASSUME_KERNEL=${kernel_version}
 export LD_LIBRARY_PATH=\$ORACLE_HOME/lib:\$LD_LIBRARY_PATH
 export DISPLAY=:0.0" >> /home/Oracle/.bash_profile
 
+if [[ ${system_version} != '7' ]]; then
+    echo_color "WARNING: Your system version is centos 7, so script does not add \"DISPLAY=:0.0\" to \"/home/Oracle/.bash_profile\"" r
+else
+    echo "export DISPLAY=:0.0" >> /home/Oracle/.bash_profile
+fi
 
 cp /root/.bash* /home/Oracle_11g
 
@@ -342,11 +351,14 @@ su - Oracle -c "env | grep Oracle"
 echo_color "**********screenshot area end*********" g
 echo_color "please input any key to continue after taking screenshot" b
 read
-echo_color "**********screenshot area start**********" g
-su - Oracle -c "env | grep DISPLAY"
-echo_color "**********screnshot end**********" g
-echo_color "please input any key to continue after taking screenshot" b
-read
+
+if [[ ${system_version} != '7' ]]; then
+    echo_color "**********screenshot area start**********" g
+    su - Oracle -c "env | grep DISPLAY"
+    echo_color "**********screnshot end**********" g
+    echo_color "please input any key to continue after taking screenshot" b
+    read
+fi
 echo_color "**********config user Oracle end**********" b
 
 rm /etc/yum.repos.d/public-yum-ol7.repo -rf
