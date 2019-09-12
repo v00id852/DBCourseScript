@@ -64,7 +64,7 @@ function check_log(){
 echo_color "*************** UESTC 信通数据库课程自动配置脚本 *********************" r
 echo_color "* 作者：雷子昂" r
 echo_color "* Email: zianglei@126.com" r
-echo_color "* Date: 2017-10-22"
+echo_color "* Date: 2017-10-22" r
 echo_color "* 如果你发现了任何BUG或者有任何意见，随时可以联系我或者在github上提issue" r
 echo_color "* GitHub: https://github.com/zianglei/DBCourseScript" r
 echo_color "******************************************************************" r
