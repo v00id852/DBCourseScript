@@ -9,7 +9,7 @@
 
 # 使用要求
 - 需要在root用户下运行该脚本
-- 需要将Oracle database 11g的安装包与该脚本放置在同一文件夹中，并且保持下载的原名称，即**linux.x64_11R2_database_1of2.zip** 和 **linux.x64_11R2_database_2of2.zip**
+- 需要将Oracle database 11g的安装包与该脚本放置在同一文件夹中，并且保持下载的原名称，即**linux.x64_11gR2_database_1of2.zip** 和 **linux.x64_11gR2_database_2of2.zip**
 - 需要保持网络畅通
 - 需保证整个磁盘至少有2.5G的空闲磁盘空间，保证能够存储解压后的数据库安装文件
 
@@ -23,6 +23,3 @@
   ```
 
 **如果有关于脚本的任何问题或者发现bug，请联系我，非常感谢**
-  
- 
-  

@@ -1,6 +1,6 @@
 #!/bin/bash
 # packages name which need to install
-packages=('binutils' 'compat-libstdc++-33' 'elfutils-libelf' 'elfutils-libelf-devel' 'elfutils-libelf-devel-st  atic' 'gcc' 'gcc-c++' 'glibc' 'glibc-common' 'glibc-devel' 'glibc-headers' 'kernel-headers' 'ksh' 'libaio' 'libaio-devel' 'libgcc' 'libgomp' 'libstdc++' 'libstdc++-devel' 'make' 'numactl-devel' 'sysstat' 'unixODBC' 'unixODBC-devel')
+packages=('binutils' 'compat-libstdc++-33' 'elfutils-libelf' 'elfutils-libelf-devel' 'elfutils-libelf-devel-static' 'gcc' 'gcc-c++' 'glibc' 'glibc-common' 'glibc-devel' 'glibc-headers' 'kernel-headers' 'ksh' 'libaio' 'libaio-devel' 'libgcc' 'libgomp' 'libstdc++' 'libstdc++-devel' 'make' 'numactl-devel' 'sysstat' 'unixODBC' 'unixODBC-devel')
 
 # packages not installed
 packages_not_installed=()
@@ -119,17 +119,8 @@ else
 fi
 
 # check free space
-free_disk=(`df | grep /dev | awk '{print $4}' | sed 's/%//g'`)
-free_disk=${free_disk[0]}
-if [ ${free_disk} -le 2621440 ]; then
-    check_log "free space" 1
-    check_status=1
-    echo_color "ERROR: 请确保硬盘可用空间大于 2.5GB" r
-else
-    check_log "free space" 0
-fi
 
-if [ ${check_status} == 1 ]; then
+if [[ ${check_status} = 1 ]]; then
     echo_color "ERROR: 检查环境失败，请根据提示修改环境后重新运行" r
     write_log "script exits"
     exit 1
@@ -156,7 +147,7 @@ else
 fi
 
 # check if expect installed
-if [[ $(command -v expect) = '']]; then
+if [[ $(command -v expect) = '' ]]; then
     check_log "是否安装 expect" 1
     write_log "install expect"
     echo_color "安装expect..." b
@@ -175,13 +166,13 @@ echo 'send "uname -r\r"' >> check_os_version.sh
 echo 'interact' >> check_os_version.sh
 chmod +x ./check_os_version.sh
 
-echo_color "报告截图环节" b
+# echo_color "报告截图环节" b
 echo_color "查看 OS 版本，请在弹出的新终端截图并关闭新终端，然后按 ENTER 进入下一步" g
 gnome-terminal -e ./check_os_version.sh
 write_log "check os version successfully."
 check_enter_key
 
-# show memory size
+# # show memory size
 echo '#!/usr/bin/expect' > check_memory_size.sh
 echo 'spawn -noecho bash' >> check_memory_size.sh
 echo 'expect "#"' >> check_memory_size.sh
@@ -193,7 +184,7 @@ gnome-terminal -e ./check_memory_size.sh
 write_log "check memory size successfully."
 check_enter_key
 
-# show swap memory size
+# # show swap memory size
 echo '#!/usr/bin/expect' > check_swap_memory.sh
 echo 'spawn -noecho bash' >> check_swap_memory.sh
 echo 'expect "#"' >> check_swap_memory.sh
@@ -205,7 +196,7 @@ gnome-terminal -e ./check_swap_memory.sh
 write_log "check swap memory size successfully."
 check_enter_key
 
-# show /tmp size
+# # show /tmp size
 echo '#!/usr/bin/expect' > check_tmp_size.sh
 echo 'spawn -noecho bash' >> check_tmp_size.sh
 echo 'expect "#"' >> check_tmp_size.sh
@@ -218,7 +209,7 @@ write_log "check /tmp free space size."
 check_enter_key
 
 
-# show sizes of every disks
+# # show sizes of every disks
 echo '#!/usr/bin/expect' > check_disk_size.sh
 echo 'spawn -noecho bash' >> check_disk_size.sh
 echo 'expect "#"' >> check_disk_size.sh
@@ -235,7 +226,7 @@ echo 'spawn -noecho bash' >> check_software.sh
 echo 'expect "#"' >> check_software.sh
 for item in ${packages[@]}
 do
-    echo 'send "rpm -qa | grep ' $item '\r"' >> check_software.sh
+    echo 'send "rpm -qa | grep '${item}'\r"' >> check_software.sh
 done
 echo 'interact' >> check_software.sh
 chmod +x ./check_software.sh
@@ -243,17 +234,6 @@ echo_color "查看安装的软件情况，请在弹出的新终端截图并关�
 gnome-terminal -e ./check_software.sh
 write_log "check software."
 check_enter_key
-
-for item in ${packages[@]}
-do
-    if [[ $(rpm -qa | grep ${item}) != '' ]]; then
-        write_log "${item} package has been installed"
-    else 
-        write_log "${item} package has not been installed"
-        packages_not_installed[${#packages_not_installed[*]}]=${item}    
-    fi
-done
-
 
 system_version="0"
 check_status=0
@@ -321,10 +301,10 @@ write_log "check packages"
 for item in ${packages[@]}
 do
     if [[ $(rpm -qa | grep ${item}) != '' ]]; then
-        echo_color "${item} 包 has been installed" b
+        echo_color "${item} 软件库已经被安装" b
         write_log "${item} package has been installed"
     else 
-        echo_color "${item} package has not been installed" b
+        echo_color "${item} 软件库没有被安装" b
         write_log "${item} package has not been installed"
         packages_not_installed[${#packages_not_installed[*]}]=${item}    
     fi
@@ -460,7 +440,7 @@ export LD_ASSUME_KERNEL=${kernel_version}
 export LD_LIBRARY_PATH=\$ORACLE_HOME/lib:\$LD_LIBRARY_PATH
 export DISPLAY=:0.0" >> /home/Oracle/.bash_profile
 
-if [[ ${system_version} != '7' ]]; then
+if [[ ${system_version} = '7' ]]; then
     echo_color "警告: 你的系统版本为 Centos 7, 所以脚本不会添加\"DISPLAY=:0.0\"到\"/home/Oracle/.bash_profile\"文件" r
 else
     echo "export DISPLAY=:0.0" >> /home/Oracle/.bash_profile
@@ -474,9 +454,9 @@ echo '#!/usr/bin/expect' > check_env_size.sh
 echo 'spawn -noecho bash' >> check_env_size.sh
 echo 'expect "#"' >> check_env_size.sh
 echo 'send "su - Oracle\r"' >> check_env_size.sh
-echo 'env | grep Oracle' >> check_env_size.sh
+echo 'send "env | grep Oracle\r"' >> check_env_size.sh
 if [[ ${system_version} != '7' ]]; then
-    echo 'env | grep DISPLAY' >> check_env_size.sh
+    echo 'send "env | grep DISPLAY\r"' >> check_env_size.sh
 fi
 echo 'interact' >> check_env_size.sh
 chmod +x ./check_env_size.sh
@@ -492,8 +472,8 @@ rm ./check_*.sh
 
 echo_color "********** 解压数据库安装文件 **********" b
 #unzip
-unzip linux.x64_11gR2_database_1of2.zip
-unzip linux.x64_11gR2_database_2of2.zip
+unzip linux.x64_11gR2_database_1of2.zip -d /home/
+unzip linux.x64_11gR2_database_2of2.zip -d /home/
 mv database /home/
 chown -R Oracle:oinstall /home/database/
 
