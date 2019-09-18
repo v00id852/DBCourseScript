@@ -396,17 +396,27 @@ else
     write_log "/etc/sysctl.conf has been modified"
 fi
 
-echo_color "修改 /etc/pam.d/login" g
-if [[ $(cat /etc/pam.d/login | grep "Oracle" ) = '' ]]; then
+echo_color "修改 /etc/security/limits.conf" g
+if [[ $(cat /etc/security/limits.conf | grep "Oracle" ) = '' ]]; then
 echo "Oracle soft nproc 2047
 Oracle hard nproc 16384
 Oracle soft nofile 1024
 Oracle hard nofile 65536
 Oracle soft stack 10240" >> /etc/security/limits.conf
-write_log <<< echo_color "modify /etc/pam.d/login" g
+write_log <<< echo_color "modify /etc/security/limits.conf" g
 else
-    write_log "/etc/pam.d/login has been modified" 
+    write_log "/etc/security/limits.conf has been modified" 
 fi
+
+echo_color "修改 /etc/pam.d/login" g
+if [[ $(cat /etc/pam.d/login | grep "pam_limits" ) = '' ]]; then
+echo "session required /lib/security/pam_limits.so
+session required pam_limits.so" >> /etc/pam.d/login
+write_log <<< echo_color "modify etc/pam.d/login" g
+else
+    write_log "etc/pam.d/login has been modified" 
+fi
+
 
 echo_color "修改 /etc/profile" g
 if [[ $(cat /etc/profile | grep "Oracle" ) = '' ]]; then
@@ -474,7 +484,6 @@ echo_color "********** 解压数据库安装文件 **********" b
 #unzip
 unzip linux.x64_11gR2_database_1of2.zip -d /home/
 unzip linux.x64_11gR2_database_2of2.zip -d /home/
-mv database /home/
 chown -R Oracle:oinstall /home/database/
 
 echo_color "成功安装！请注销当前用户登陆并登陆 Oracle 用户，之后跟随实验步骤3.2进行图形界面安装" g
